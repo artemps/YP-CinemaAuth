@@ -26,7 +26,3 @@ pytest = "7.0.1"
 isort = "5.10.1"
 mypy = "1.1.1"
 flakeheaven = "2.1.2"
-
-[build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
