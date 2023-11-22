@@ -4,23 +4,15 @@ up:
 
 .PHONY: test
 test:
-	cd src && poetry run pytest .
+	cd src && poetry run pytest ./
 
-.PHONY: flakeheaven
-flakeheaven:
-	cd src && poetry run flakeheaven lint .
-
-.PHONY: flake8
-flake8:
-	cd src && poetry run flake8 .
+.PHONY: ruff
+ruff:
+	cd src && poetry run ruff check ./
 
 .PHONY: mypy
 mypy:
-	cd src && poetry run mypy .
-
-.PHONY: isort
-isort:
-	cd src && poetry run isort .
+	cd src && poetry run mypy ./
 
 .PHONY: lint
-lint: flakeheaven flake8 mypy isort
+lint: ruff mypy

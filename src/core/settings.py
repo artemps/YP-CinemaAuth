@@ -10,24 +10,24 @@ from core.logger import LOGGING
 
 
 class Settings(BaseSettings):
-    project_name: str = Field("Cinema Auth", env="PROJECT_NAME")
+    project_name: str = Field(default="Cinema Auth", env="PROJECT_NAME")
     base_dir: Path = Path(__file__).parent
-    debug: bool = Field(..., env="DEBUG")
-    secret_key: str = Field(..., env="SECRET_KEY")
-    app_host: str = Field(..., env="APP_HOST")
-    app_port: int = Field(..., env="APP_PORT")
+    debug: bool = Field(default=True, env="DEBUG")
+    secret_key: str = Field(default="SOMETHING_REALLY_SECRET", env="SECRET_KEY")
+    app_host: str = Field(default="localhost", env="APP_HOST")
+    app_port: int = Field(default=8080, env="APP_PORT")
 
     api_documentation_url: str = "/api/docs"
     openapi_documentation_url: str = "/api/openapi.json"
 
-    redis_host: str = Field(..., env="REDIS_HOST")
-    redis_port: int = Field(..., env="REDIS_PORT")
+    redis_host: str = Field(default="localhost", env="REDIS_HOST")
+    redis_port: int = Field(default=6379, env="REDIS_PORT")
 
-    db_name: str = Field(..., env="DB_NAME")
-    db_user: str = Field(..., env="DB_USER")
-    db_password: str = Field(..., env="DB_PASSWORD")
-    db_host: str = Field(..., env="DB_HOST")
-    db_port: int = Field(..., env="DB_PORT")
+    db_name: str = Field(default="cinema_auth", env="DB_NAME")
+    db_user: str = Field(default="app", env="DB_USER")
+    db_password: str = Field(default="123qwe", env="DB_PASSWORD")
+    db_host: str = Field(default="localhost", env="DB_HOST")
+    db_port: int = Field(default=5432, env="DB_PORT")
 
     logging_config.dictConfig(LOGGING)
 
