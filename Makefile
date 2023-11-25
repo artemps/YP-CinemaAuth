@@ -1,18 +1,20 @@
+POETRY := $(shell command -v poetry 2> /dev/null)
+
 .PHONY: up
 up:
-	docker-compose -f docker-compose.dev.yml --env-file .env up --build -d && poetry run python src/main.py
+	docker-compose -f docker-compose.dev.yml --env-file .env up --build -d && $(POETRY) run python src/main.py
 
 .PHONY: test
 test:
-	cd src && poetry run pytest ./
+	$(POETRY) run pytest src/
 
 .PHONY: ruff
 ruff:
-	cd src && poetry run ruff check ./
+	$(POETRY) run ruff check src/
 
 .PHONY: mypy
 mypy:
-	cd src && poetry run mypy ./
+	$(POETRY) run mypy src/
 
 .PHONY: lint
 lint: ruff mypy

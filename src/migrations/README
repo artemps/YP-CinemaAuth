@@ -1,0 +1,10 @@
+Generic single-database configuration with an async dbapi.
+
+Init alembic:
+alembic init -t async migrations
+
+Create migration:
+alembic revision --autogenerate -m "comment"
+
+Apply migrations:
+alembic upgrade head
