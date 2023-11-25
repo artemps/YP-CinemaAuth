@@ -39,7 +39,7 @@ class User(Base):
         return f"<User {self.login}>"
 
 
-class UserLogins(Base):
+class UserLogin(Base):
     __tablename__ = "users_logins"
     metadata = metadata
 
