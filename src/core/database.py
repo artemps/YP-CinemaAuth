@@ -2,7 +2,7 @@ from sqlalchemy import MetaData
 from sqlalchemy.orm import declarative_base, sessionmaker
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 
-from main import settings
+from core import settings
 
 Base = declarative_base()
 metadata = MetaData()
