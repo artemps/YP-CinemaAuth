@@ -9,7 +9,7 @@ from alembic import context
 
 from main import settings
 from core.database import metadata
-from models.models import User, UserLogin, UserRole, Role
+from models import User, UserLogin
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
