@@ -16,11 +16,15 @@ class AbstractRepository(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    async def update_one(self, id: UUID, data: dict):
+    async def update_one(self, id: UUID, data: dict) -> None:
         raise NotImplementedError
 
     @abstractmethod
     async def get_by_login(self, login: str) -> User:
+        raise NotImplementedError
+
+    @abstractmethod
+    async def get_by_id(self, id: UUID) -> User:
         raise NotImplementedError
 
     @abstractmethod
@@ -38,20 +42,23 @@ class SQLAlchemyRepository(AbstractRepository):
             await session.commit()
             return res.scalar_one()
 
-    async def update_one(self, id: UUID, data: dict):
+    async def update_one(self, id: UUID, data: dict) -> None:
         async with async_session() as session:
             stmt = update(self.model).where(self.model.id == id).values(**data)
             await session.execute(stmt)
             await session.commit()
 
-    async def get_by_login(self, login: str) -> Optional[User]:
+    async def get_by_login(self, login: str) -> User:
         async with async_session() as session:
             stmt = select(self.model).where(self.model.login == login)
             res = await session.execute(stmt)
-            res = [x[0] for x in res]
-            if not res:
-                return None
-            return res[0]
+            return res.scalar_one()
+
+    async def get_by_id(self, id: UUID) -> User:
+        async with async_session() as session:
+            statement = select(self.model).where(self.model.id == id)
+            result = await session.execute(statement)
+            return result.scalar_one()
 
     async def check_unique_login(self, login: str) -> bool:
         async with async_session() as session:

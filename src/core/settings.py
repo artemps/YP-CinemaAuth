@@ -31,7 +31,7 @@ class Settings(BaseSettings):
 
     access_token_ttl: int = Field(default=60 * 20, env="ACCESS_TOKEN_TTL")  # 20 minutes
     refresh_token_ttl: int = Field(default=60 * 60 * 24 * 3, env="REFRESH_TOKEN_TTL")  # 3 days
-    encryption_algorithm: str = Field(default="SHA256", env="ENCRYPTION_ALGORITHM")
+    encryption_algorithm: str = Field(default="HS256", env="ENCRYPTION_ALGORITHM")
 
     logging_config.dictConfig(LOGGING)
 

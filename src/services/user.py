@@ -1,40 +1,51 @@
 from uuid import UUID
 
-from werkzeug.security import check_password_hash, generate_password_hash
+from fastapi import HTTPException, status
 
 from repository.database import AbstractRepository, UserRepository
-from schemas import UserCreate, UserLogin
+from api.v1.users import schemas
+from services.security import SecurityService
+from models import User
+from sqlalchemy.exc import NoResultFound, MultipleResultsFound
 
 
 class UserService:
-    def __init__(self, repository: AbstractRepository):
+    def __init__(self, repository: AbstractRepository) -> None:
         self.repository: AbstractRepository = repository
 
-    async def add_user(self, user_create: UserCreate) -> str:
+    async def create(
+        self,
+        user_create: schemas.UserCreateIn,
+        security_service: SecurityService,
+    ) -> User:
         exists = await self.repository.check_unique_login(user_create.login)
         if exists:
-            return "Login exists"
+            raise HTTPException(status.HTTP_409_CONFLICT, "Login already taken")
+
         user_dict = user_create.model_dump()
-        user_dict["password"] = generate_password_hash(user_dict["password"])
+        user_dict["password"] = security_service.create_hashed_password(user_dict["password"])
         await self.repository.add_one(user_dict)
-        return "Created"
+        user = await self.repository.get_by_login(user_dict["login"])
+        return user
 
-    async def edit_user(self, user_id: UUID, user_update: UserCreate) -> str:
-        exists = await self.repository.check_unique_login(user_update.login)
-        if exists:
-            return "Login exists"
-        user_dict = user_update.model_dump()
-        await self.repository.update_one(user_id, user_dict)
-        return "Updated"
+    async def update(self, id: UUID, schema: schemas.UserUpdateIn) -> User:
+        await self.repository.update_one(id, schema.model_dump(exclude_unset=True))
+        user = await self.get(id=id)
+        return user
 
-    async def make_login(self, credentials: UserLogin) -> str:
-        user = await self.repository.get_by_login(credentials.login)
-        if not user:
-            return "User not found"
+    async def get(self, *, id: UUID = None, login: str = None) -> User:
+        try:
+            if id is not None:
+                return await self.repository.get_by_id(id)
 
-        is_correct = check_password_hash(user.password, credentials.password)
-        if not is_correct:
-            return "Bad password"
+            if login is not None:
+                return await self.repository.get_by_login(login)
+
+        except NoResultFound:
+            raise HTTPException(status.HTTP_404_NOT_FOUND, "User not found")
+
+        except MultipleResultsFound:
+            raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, "Multiple users found")
 
 
 def get_user_service():

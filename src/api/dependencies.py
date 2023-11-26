@@ -1,14 +1,16 @@
-from fastapi import Depends, status, HTTPException
+from uuid import UUID
 
-from services import UserService, SecurityService
+from fastapi import Depends
+
+from services import UserService, SecurityService, get_user_service, get_security_service
+from models import User
 
 
 async def authenticated_user(
-    user_service: UserService = Depends(),
-    token: str = Depends(SecurityService.authenticate),
-) -> "UserModel":  # TODO: change to the real model
-    user = await user_service.get_user_by_id(token)
-    if user is None:
-        raise HTTPException(status.HTTP_404_NOT_FOUND, "User not found")
-
+    token: str = Depends(SecurityService.auth_scheme),
+    user_service: UserService = Depends(get_user_service),
+    security_service: SecurityService = Depends(get_security_service),
+) -> User:
+    user_id = security_service.authenticate(token)
+    user = await user_service.get(id=user_id)
     return user
