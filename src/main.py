@@ -2,9 +2,9 @@ import logging
 
 from fastapi import FastAPI
 
-from core.settings import Settings
+from core import settings
+from api.router import router
 
-settings = Settings()
 
 app = FastAPI(
     title=settings.project_name,
@@ -12,7 +12,7 @@ app = FastAPI(
     openapi_url=settings.openapi_documentation_url,
     docs_url=settings.api_documentation_url,
 )
-
+app.include_router(router)
 
 if __name__ == "__main__":
     import uvicorn

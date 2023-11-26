@@ -19,6 +19,7 @@ alembic = "1.12.1"
 async-fastapi-jwt-auth = '0.6.1'
 typer = "0.9.0"
 passlib = "1.7.4"
+python-jose = "^3.3.0"
 
 [tool.poetry.dev-dependencies]
 Faker = "14.0.0"
@@ -57,7 +58,7 @@ line-length = 88
 indent-width = 4
 
 # Assume Python 3.8
-target-version = "py38"
+target-version = "py311"
 
 [tool.ruff.lint]
 # Enable Pyflakes (`F`) and a subset of the pycodestyle (`E`)  codes by default.

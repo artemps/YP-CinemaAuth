@@ -29,6 +29,10 @@ class Settings(BaseSettings):
     db_host: str = Field(default="localhost", env="DB_HOST")
     db_port: int = Field(default=5432, env="DB_PORT")
 
+    access_token_ttl: int = Field(default=60 * 20, env="ACCESS_TOKEN_TTL")  # 20 minutes
+    refresh_token_ttl: int = Field(default=60 * 60 * 24 * 3, env="REFRESH_TOKEN_TTL")  # 3 days
+    encryption_algorithm: str = Field(default="SHA256", env="ENCRYPTION_ALGORITHM")
+
     logging_config.dictConfig(LOGGING)
 
     class Config:
@@ -39,3 +43,6 @@ class Settings(BaseSettings):
     @property
     def log_config(self) -> dict:
         return LOGGING
+
+
+settings = Settings()
