@@ -44,5 +44,9 @@ class Settings(BaseSettings):
     def log_config(self) -> dict:
         return LOGGING
 
+    @property
+    def database_dsn(self) -> str:
+        return f"postgresql+asyncpg://{self.db_user}:{self.db_password}@{self.db_host}:{self.db_port}/{self.db_name}"
+
 
 settings = Settings()

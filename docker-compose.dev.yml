@@ -3,7 +3,7 @@ version: '3.7'
 services:
   db:
     image: postgres:13
-    container_name: db
+    container_name: auth_db
     volumes:
       - postgres_data:/var/lib/postgresql/data/
     env_file:
@@ -17,7 +17,7 @@ services:
 
   redis:
     image: redis:alpine
-    container_name: redis1
+    container_name: auth_redis
     ports:
       - "6379:6379"
 
