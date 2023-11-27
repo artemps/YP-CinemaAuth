@@ -29,6 +29,10 @@ class Settings(BaseSettings):
     db_host: str = Field(default="localhost", env="DB_HOST")
     db_port: int = Field(default=5432, env="DB_PORT")
 
+    access_token_ttl: int = Field(default=60 * 20, env="ACCESS_TOKEN_TTL")  # 20 minutes
+    refresh_token_ttl: int = Field(default=60 * 60 * 24 * 3, env="REFRESH_TOKEN_TTL")  # 3 days
+    encryption_algorithm: str = Field(default="HS256", env="ENCRYPTION_ALGORITHM")
+
     logging_config.dictConfig(LOGGING)
 
     class Config:
@@ -43,3 +47,6 @@ class Settings(BaseSettings):
     @property
     def database_dsn(self) -> str:
         return f"postgresql+asyncpg://{self.db_user}:{self.db_password}@{self.db_host}:{self.db_port}/{self.db_name}"
+
+
+settings = Settings()

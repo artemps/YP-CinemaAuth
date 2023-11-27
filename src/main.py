@@ -2,10 +2,9 @@ import logging
 
 from fastapi import FastAPI
 
-from core.settings import Settings
+from core import settings
 from api.router import router
 
-settings = Settings()
 
 app = FastAPI(
     title=settings.project_name,
