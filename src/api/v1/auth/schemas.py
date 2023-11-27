@@ -14,4 +14,5 @@ class UserLoginIn(BaseModel):
 
 class UserLoginOut(BaseModel):
     access_token: str = Field(..., description="Access token for authentication")
+    refresh_token: str = Field(..., description="Refresh token for authentication")
     token_type: str = Field(..., description="Token type for authentication")
