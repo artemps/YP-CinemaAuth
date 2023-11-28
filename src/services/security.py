@@ -1,4 +1,5 @@
 import time
+import calendar
 from uuid import UUID
 
 from fastapi import HTTPException, Depends, status
@@ -75,13 +76,32 @@ class SecurityService:
         redis_service.revoke_token(jti)
         return {"access_token": new_access_token, "refresh_token": new_refresh_token}
 
-    async def authenticate(self, Authorize, login: str) -> list:
+    async def authenticate(
+            self,
+            Authorize,
+            login: str,
+            redis_service: RedisService = get_redis_service()
+    ) -> list:
         await Authorize.jwt_required()
         current_user = await Authorize.get_jwt_subject()
+        jti = (await Authorize.get_raw_jwt())["jti"]
+        entry = redis_service.get_token(jti)
+        if entry:
+            raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Token in revoke list")
         if login != current_user:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Have not access")
 
         return current_user
+
+    async def logout(
+            self,
+            Authorize,
+            redis_service: RedisService = get_redis_service()
+    ):
+        _jwt = (await Authorize.get_raw_jwt())
+        exp = _jwt['exp']
+        now = calendar.timegm(time.gmtime())
+        redis_service.revoke_token(_jwt['jti'], exp - now)
 
 
 def get_security_service() -> SecurityService:

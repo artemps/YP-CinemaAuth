@@ -36,3 +36,12 @@ async def refresh(
         refresh_token=new_tokens.get("refresh_token"),
         token_type="bearer"
     )
+
+
+@router.post("/logout")
+async def logout(
+        Authorize: AuthJWT = Depends(),
+        security_service: SecurityService = Depends(get_security_service),
+) -> schemas.UserLogout():
+    await security_service.logout(Authorize)
+    return schemas.UserLogout()
