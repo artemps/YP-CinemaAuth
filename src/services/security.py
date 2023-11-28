@@ -1,4 +1,5 @@
 import time
+import calendar
 from uuid import UUID
 
 from fastapi import HTTPException, Depends, status
@@ -8,21 +9,27 @@ from passlib.context import CryptContext
 
 from core import settings
 
+from fastapi import Depends, FastAPI, HTTPException, Request
+from fastapi.responses import JSONResponse
+
+from async_fastapi_jwt_auth import AuthJWT
+
+from repository.redis import RedisService, get_redis_service
+
 
 class SecurityService:
     pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
     auth_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
+
     __slots__ = ("_secret_key", "_encryption_algorithm", "_access_token_ttl", "_refresh_token_ttl")
 
     def __init__(
         self,
-        secret_key: str,
         encryption_algorithm: str,
         access_token_ttl: int,
-        refresh_token_ttl: int,
+        refresh_token_ttl: int
     ) -> None:
-        self._secret_key = secret_key
         self._encryption_algorithm = encryption_algorithm
         self._access_token_ttl = access_token_ttl
         self._refresh_token_ttl = refresh_token_ttl
@@ -36,34 +43,70 @@ class SecurityService:
     def create_hashed_password(self, password: str) -> str:
         return self.pwd_context.hash(password)
 
-    def create_access_token(self, user_id: UUID) -> str:
-        payload = {"user_id": str(user_id), "expires": time.time() + self._refresh_token_ttl}
-        token = jwt.encode(payload, key=self._secret_key, algorithm=self._encryption_algorithm)
-        return token
+    async def create_access_token(self, user_login: str, Authorize) -> str:
+        access_token = await Authorize.create_access_token(
+            subject=user_login,
+            expires_time=self._refresh_token_ttl,
+            algorithm=self._encryption_algorithm
+        )
+        return access_token
 
-    def authenticate(self, token: str) -> UUID:
-        if token is None:
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token is required")
+    async def create_refresh_token(self, user_login: str, Authorize) -> str:
+        refresh_token = await Authorize.create_refresh_token(
+            subject=user_login,
+            expires_time=self._access_token_ttl,
+            algorithm=self._encryption_algorithm
+        )
+        return refresh_token
 
-        try:
-            payload = jwt.decode(token, key=self._secret_key, algorithms=[self._encryption_algorithm])
-        except JWTError:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Token is invalid")
+    async def refresh_token(
+            self,
+            Authorize,
+            redis_service: RedisService = get_redis_service()
+    ):
+        await Authorize.jwt_refresh_token_required()
+        current_user = await Authorize.get_jwt_subject()
+        new_access_token = await self.create_access_token(current_user, Authorize)
+        new_refresh_token = await self.create_refresh_token(current_user, Authorize)
+        jti = (await Authorize.get_raw_jwt())["jti"]
 
-        expire = payload.get("expires")
+        entry = redis_service.get_token(jti)
+        if entry:
+            raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Token in revoke list")
+        redis_service.revoke_token(jti)
+        return {"access_token": new_access_token, "refresh_token": new_refresh_token}
 
-        if expire is None:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Token is invalid")
+    async def authenticate(
+            self,
+            Authorize,
+            login: str,
+            redis_service: RedisService = get_redis_service()
+    ) -> list:
+        await Authorize.jwt_required()
+        current_user = await Authorize.get_jwt_subject()
+        jti = (await Authorize.get_raw_jwt())["jti"]
+        entry = redis_service.get_token(jti)
+        if entry:
+            raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Token in revoke list")
+        if login != current_user:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Have not access")
 
-        if time.time() > expire:
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token has expired")
+        return current_user
 
-        return UUID(payload["user_id"])
+    async def logout(
+            self,
+            Authorize,
+            redis_service: RedisService = get_redis_service()
+    ):
+        await Authorize.jwt_refresh_token_required()
+        _jwt = (await Authorize.get_raw_jwt())
+        exp = _jwt['exp']
+        now = calendar.timegm(time.gmtime())
+        redis_service.revoke_token(_jwt['jti'], exp - now)
 
 
 def get_security_service() -> SecurityService:
     return SecurityService(
-        secret_key=settings.secret_key,
         encryption_algorithm=settings.encryption_algorithm,
         access_token_ttl=settings.access_token_ttl,
         refresh_token_ttl=settings.refresh_token_ttl,

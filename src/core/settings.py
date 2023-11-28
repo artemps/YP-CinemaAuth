@@ -8,6 +8,7 @@ from pydantic import Field
 
 from core.logger import LOGGING
 
+from async_fastapi_jwt_auth import AuthJWT
 
 class Settings(BaseSettings):
     project_name: str = Field(default="Cinema Auth", env="PROJECT_NAME")
@@ -33,6 +34,10 @@ class Settings(BaseSettings):
     refresh_token_ttl: int = Field(default=60 * 60 * 24 * 3, env="REFRESH_TOKEN_TTL")  # 3 days
     encryption_algorithm: str = Field(default="HS256", env="ENCRYPTION_ALGORITHM")
 
+    authjwt_secret_key: str = Field(default="SOMETHING_REALLY_SECRET", env="SECRET_KEY")
+    authjwt_denylist_enabled: bool = False
+    authjwt_denylist_token_checks: set = {"access", "refresh"}
+
     logging_config.dictConfig(LOGGING)
 
     class Config:
@@ -50,3 +55,7 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
+
+@AuthJWT.load_config
+def get_config():
+    return settings
