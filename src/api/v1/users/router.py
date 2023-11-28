@@ -16,7 +16,7 @@ async def register_user(
     schema: schemas.UserCreateIn = Body(..., description="User registration data"),
     user_service: UserService = Depends(get_user_service),
     security_service: SecurityService = Depends(get_security_service),
-) -> schemas.UserCreateOut:
+) -> schemas.UserOut:
     user = await user_service.create(schema, security_service)
     return user
 
@@ -37,4 +37,5 @@ async def update_user(
     schema: schemas.UserUpdateIn = Body(..., description="User update data"),
     user_service: UserService = Depends(get_user_service),
 ) -> schemas.UserOut:
-    return await user_service.update(id, schema)
+    user = await user_service.update(id, schema)
+    return user

@@ -30,15 +30,3 @@ class UserCreateIn(BaseModel):
 
     class Config:
         extra = Extra.forbid
-
-
-class UserCreateOut(BaseModel):
-    id: UUID = Field(..., description="Unique user identifier")
-    login: str = Field(..., description="Unique user login information")
-    first_name: str | None = Field(None, description="Account first name")
-    last_name: str | None = Field(None, description="Account last name")
-    created_at: dt.datetime = Field(..., description="Account creation date")
-
-    class Config:
-        orm_mode = True
-
