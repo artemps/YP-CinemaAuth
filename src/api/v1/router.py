@@ -3,7 +3,6 @@ from fastapi.routing import APIRouter
 from .auth.router import router as auth_router
 from .users.router import router as users_router
 
-
 router = APIRouter()
 
 

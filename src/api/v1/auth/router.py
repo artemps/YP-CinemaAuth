@@ -1,11 +1,16 @@
-from fastapi import APIRouter, Depends
-
-from services import SecurityService, UserService, get_user_service, get_security_service
-
-from .const import ENDPOINT_DESCRIPTIONS
-from . import schemas
+import asyncio
 
 from async_fastapi_jwt_auth import AuthJWT
+from fastapi import APIRouter, Depends
+
+from services import (
+    SecurityService,
+    UserService,
+    get_security_service,
+    get_user_service,
+)
+from . import schemas
+from .const import ENDPOINT_DESCRIPTIONS
 
 router = APIRouter()
 
@@ -15,33 +20,34 @@ async def login(
     schema: schemas.UserLoginIn,
     security_service: SecurityService = Depends(get_security_service),
     user_service: UserService = Depends(get_user_service),
-    Authorize: AuthJWT = Depends()
+    auth: AuthJWT = Depends()
 ) -> schemas.UserLoginOut:
     user = await user_service.get(login=schema.login)
     security_service.verify_password(schema.password, user.password)
-    access_token = await security_service.create_access_token(user.login, Authorize)
-    refresh_token = await security_service.create_refresh_token(user.login, Authorize)
+    access_token, refresh_token = await asyncio.gather(
+        security_service.create_access_token(user.login, auth),
+        security_service.create_refresh_token(user.login, auth),
+    )
     return schemas.UserLoginOut(access_token=access_token, refresh_token=refresh_token, token_type="bearer")
 
 
 @router.post("/refresh")
 async def refresh(
-        Authorize: AuthJWT = Depends(),
-        security_service: SecurityService = Depends(get_security_service),
+    auth: AuthJWT = Depends(),
+    security_service: SecurityService = Depends(get_security_service),
 ) -> schemas.UserLoginOut:
-
-    new_tokens = await security_service.refresh_token(Authorize)
+    new_tokens = await security_service.refresh_token(auth)
     return schemas.UserLoginOut(
         access_token=new_tokens.get("access_token"),
         refresh_token=new_tokens.get("refresh_token"),
-        token_type="bearer"
+        token_type="bearer",
     )
 
 
 @router.post("/logout")
 async def logout(
-        Authorize: AuthJWT = Depends(),
-        security_service: SecurityService = Depends(get_security_service),
+    auth: AuthJWT = Depends(),
+    security_service: SecurityService = Depends(get_security_service),
 ) -> schemas.UserLogout():
-    await security_service.logout(Authorize)
+    await security_service.logout(auth)
     return schemas.UserLogout()

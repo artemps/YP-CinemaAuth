@@ -10,8 +10,8 @@ class RedisService:
     def get_token(self, token):
         return self.conn.get(token)
 
-    def revoke_token(self, token):
-        self.conn.setex(token, settings.refresh_token_ttl, "true")
+    def revoke_token(self, token: str, expire: int = settings.access_token_ttl):
+        self.conn.setex(token, expire, "true")
 
 
 def get_redis_service():

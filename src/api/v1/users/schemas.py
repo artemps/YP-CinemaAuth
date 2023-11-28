@@ -1,7 +1,7 @@
 import datetime as dt
 from uuid import UUID
 
-from pydantic import BaseModel, Field, Extra
+from pydantic import BaseModel, Extra, Field
 
 
 class UserOut(BaseModel):
