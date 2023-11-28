@@ -98,6 +98,7 @@ class SecurityService:
             Authorize,
             redis_service: RedisService = get_redis_service()
     ):
+        await Authorize.jwt_refresh_token_required()
         _jwt = (await Authorize.get_raw_jwt())
         exp = _jwt['exp']
         now = calendar.timegm(time.gmtime())
