@@ -1,9 +1,13 @@
 import logging
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse
 
 from core import settings
 from api.router import router
+
+from async_fastapi_jwt_auth import AuthJWT
+from async_fastapi_jwt_auth.exceptions import AuthJWTException
 
 
 app = FastAPI(
@@ -13,6 +17,11 @@ app = FastAPI(
     docs_url=settings.api_documentation_url,
 )
 app.include_router(router, prefix="/api")
+
+
+@app.exception_handler(AuthJWTException)
+def authjwt_exception_handler(request: Request, exc: AuthJWTException):
+    return JSONResponse(status_code=exc.status_code, content={"detail": exc.message})
 
 
 if __name__ == "__main__":
@@ -26,3 +35,7 @@ if __name__ == "__main__":
         log_level=logging.DEBUG if settings.debug else logging.INFO,
         reload=settings.debug,
     )
+
+
+
+
