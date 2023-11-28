@@ -4,7 +4,7 @@ from uuid import UUID
 from sqlalchemy import insert, select, update
 
 from core.database import async_session
-from models import User
+from models import User, UserLogin
 
 
 class AbstractRepository(ABC):
@@ -28,6 +28,10 @@ class AbstractRepository(ABC):
 
     @abstractmethod
     async def check_unique_login(self, login: str) -> bool:
+        raise NotImplementedError
+
+    @abstractmethod
+    async def make_login(self, user: User) -> None:
         raise NotImplementedError
 
 
@@ -64,6 +68,12 @@ class SQLAlchemyRepository(AbstractRepository):
             stmt = select(self.model).where(self.model.login == login)
             res = await session.execute(stmt)
             return len([x[0] for x in res]) > 0
+
+    async def make_login(self, user: User) -> None:
+        async with async_session() as session:
+            stmt = insert(UserLogin).values({"user_id": user.id})
+            await session.execute(stmt)
+            await session.commit()
 
 
 class UserRepository(SQLAlchemyRepository):

@@ -21,8 +21,9 @@ services:
     env_file:
       - .env
     environment:
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: app
+      POSTGRES_PASSWORD: 123qwe
+      POSTGRES_USER: app
+      POSTGRES_DB: cinema_auth
     restart: unless-stopped
 
   redis:

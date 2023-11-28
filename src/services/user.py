@@ -47,6 +47,9 @@ class UserService:
         except MultipleResultsFound:
             raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, "Multiple users found")
 
+    async def make_login(self, user: User) -> None:
+        await self.repository.make_login(user)
+
 
 def get_user_service():
     return UserService(UserRepository())
