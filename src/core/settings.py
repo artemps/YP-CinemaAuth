@@ -1,14 +1,13 @@
 from logging import config as logging_config
 from pathlib import Path
 
+from async_fastapi_jwt_auth import AuthJWT
 from dotenv import find_dotenv
-from pydantic_settings import BaseSettings
-
 from pydantic import Field
+from pydantic_settings import BaseSettings
 
 from core.logger import LOGGING
 
-from async_fastapi_jwt_auth import AuthJWT
 
 class Settings(BaseSettings):
     project_name: str = Field(default="Cinema Auth", env="PROJECT_NAME")
@@ -56,6 +55,7 @@ class Settings(BaseSettings):
 
 settings = Settings()
 
+
 @AuthJWT.load_config
-def get_config():
+def get_config() -> Settings:
     return settings

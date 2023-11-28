@@ -1,11 +1,10 @@
 from abc import ABC, abstractmethod
 from uuid import UUID
-from typing import Optional
 
-from sqlalchemy import insert, update, select
+from sqlalchemy import insert, select, update
 
-from models import User
 from core.database import async_session
+from models import User
 
 
 class AbstractRepository(ABC):

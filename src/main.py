@@ -1,13 +1,11 @@
 import logging
 
+from async_fastapi_jwt_auth.exceptions import AuthJWTException
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 
-from core import settings
 from api.router import router
-
-from async_fastapi_jwt_auth import AuthJWT
-from async_fastapi_jwt_auth.exceptions import AuthJWTException
+from core import settings
 
 
 app = FastAPI(
@@ -20,7 +18,7 @@ app.include_router(router, prefix="/api")
 
 
 @app.exception_handler(AuthJWTException)
-def authjwt_exception_handler(request: Request, exc: AuthJWTException):
+def authjwt_exception_handler(request: Request, exc: AuthJWTException) -> JSONResponse:
     return JSONResponse(status_code=exc.status_code, content={"detail": exc.message})
 
 

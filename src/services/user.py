@@ -1,12 +1,12 @@
 from uuid import UUID
 
 from fastapi import HTTPException, status
+from sqlalchemy.exc import MultipleResultsFound, NoResultFound
 
-from repository.database import AbstractRepository, UserRepository
 from api.v1.users import schemas
-from services.security import SecurityService
 from models import User
-from sqlalchemy.exc import NoResultFound, MultipleResultsFound
+from repository.database import AbstractRepository, UserRepository
+from services.security import SecurityService
 
 
 class UserService:
