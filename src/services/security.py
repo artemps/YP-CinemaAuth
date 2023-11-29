@@ -3,7 +3,6 @@ import time
 
 from async_fastapi_jwt_auth import AuthJWT
 from fastapi import HTTPException, status
-from fastapi.security import OAuth2PasswordBearer
 from passlib.context import CryptContext
 
 from core import settings
