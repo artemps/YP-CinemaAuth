@@ -1,6 +1,4 @@
-from uuid import UUID
-
-from async_fastapi_jwt_auth import AuthJWT
+mfrom async_fastapi_jwt_auth import AuthJWT
 from fastapi import Depends
 
 from models import User
