@@ -4,7 +4,6 @@ from sqlalchemy.orm import declarative_base, sessionmaker
 
 from core import settings
 
-
 Base = declarative_base()
 metadata = MetaData()
 

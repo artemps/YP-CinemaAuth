@@ -7,7 +7,6 @@ from fastapi.responses import JSONResponse
 from api.router import router
 from core import settings
 
-
 app = FastAPI(
     title=settings.project_name,
     debug=settings.debug,
