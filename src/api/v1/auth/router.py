@@ -15,7 +15,7 @@ from .const import ENDPOINT_DESCRIPTIONS
 router = APIRouter()
 
 
-@router.post("/login", description=ENDPOINT_DESCRIPTIONS["/login"])
+@router.post("/login", description=ENDPOINT_DESCRIPTIONS["login"])
 async def login(
     schema: schemas.UserLoginIn,
     security_service: SecurityService = Depends(get_security_service),
