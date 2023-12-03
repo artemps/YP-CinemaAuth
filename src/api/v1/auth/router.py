@@ -21,14 +21,12 @@ async def login(
     security_service: SecurityService = Depends(get_security_service),
     user_service: UserService = Depends(get_user_service),
     auth: AuthJWT = Depends()
-) -> schemas.UserLoginOut:
+):
     user = await user_service.get(login=schema.login)
     security_service.verify_password(schema.password, user.password)
     await user_service.make_login(user)
-    access_token, refresh_token = await asyncio.gather(
-        security_service.create_access_token(user.login, auth),
-        security_service.create_refresh_token(user.login, auth),
-    )
+    access_token = await security_service.create_access_token(user.login, auth)
+    refresh_token = await security_service.create_refresh_token(user.login, auth, access_token)
     return schemas.UserLoginOut(access_token=access_token, refresh_token=refresh_token, token_type="bearer")
 
 
