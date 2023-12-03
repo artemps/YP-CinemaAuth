@@ -1,7 +1,7 @@
 import asyncio
 
 from async_fastapi_jwt_auth import AuthJWT
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Request
 
 from services import (
     SecurityService,
@@ -18,13 +18,19 @@ router = APIRouter()
 @router.post("/login", description=ENDPOINT_DESCRIPTIONS["login"])
 async def login(
     schema: schemas.UserLoginIn,
+    request: Request,
     security_service: SecurityService = Depends(get_security_service),
     user_service: UserService = Depends(get_user_service),
     auth: AuthJWT = Depends()
 ) -> schemas.UserLoginOut:
     user = await user_service.get(login=schema.login)
     security_service.verify_password(schema.password, user.password)
-    await user_service.make_login(user)
+    coro = user_service.create_login_record(
+        user.id,
+        user_agent=request.headers.get("User-Agent"),
+        ip_address=request.client.host,
+    )
+    asyncio.create_task(coro)
     access_token, refresh_token = await asyncio.gather(
         security_service.create_access_token(user.login, auth),
         security_service.create_refresh_token(user.login, auth),

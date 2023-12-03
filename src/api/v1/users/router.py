@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from fastapi import APIRouter, Body, Depends, Path, status
+from fastapi import APIRouter, Body, Depends, Path, status, Query
 
 from api.dependencies import authenticated_user
 from repository.sql_alchemy.models import User
@@ -48,3 +48,14 @@ async def update_user(
 ) -> schemas.UserOut:
     user = await user_service.update(id, schema)
     return user
+
+
+@router.get("/{id}/login_history", description=ENDPOINT_DESCRIPTIONS["user_login_history"], dependencies=[Depends(authenticated_user)])
+async def user_login_history(
+    id: UUID = Path(..., description="User id"),
+    limit: int = Query(10, description="Limit"),
+    offset: int = Query(0, description="Offset"),
+    user_service: UserService = Depends(get_user_service),
+) -> list[schemas.UserLoginHistoryOut]:
+    records = await user_service.get_login_records(id, limit, offset)
+    return records

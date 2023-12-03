@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from uuid import UUID
 
-from .schemas import UserSchema, UserLoginSchema, Roles
+from .schemas import UserSchema, UserLoginSchema, Roles, BaseUserSchema
 
 
 class AbstractRepository(ABC):
@@ -14,7 +14,7 @@ class AbstractRepository(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    async def create_user(self, data: dict) -> UserSchema:
+    async def create_user(self, data: dict) -> BaseUserSchema:
         raise NotImplementedError
 
     @abstractmethod

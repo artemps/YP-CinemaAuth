@@ -7,6 +7,7 @@ from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship, Mapped, mapped_column
 
 from core.database import Base, metadata
+from .user_roles import association_table as user_role_association_table
 
 
 class User(Base):
@@ -26,7 +27,7 @@ class User(Base):
         "UserLogin", back_populates="user", order_by="desc(UserLogin.login_at)", cascade="all, delete"
     )
     roles: Mapped[Set["UserRole"]] = relationship(
-        "UserRole", secondary="users_roles_map", collection_class=set, back_populates="users"
+        "UserRole", secondary=user_role_association_table, collection_class=set, back_populates="users", lazy="joined"
     )
 
     def __repr__(self) -> str:

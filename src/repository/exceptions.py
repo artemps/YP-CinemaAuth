@@ -1,8 +1,14 @@
-class ObjectDoesNotExist(Exception):
+class UserDoesNotExist(Exception):
     pass
 
 
-class ObjectAlreadyExists(Exception):
+class UserAlreadyExists(Exception):
     pass
 
 
+class RoleDoesNotExist(Exception):
+    pass
+
+
+class RoleAlreadyExists(Exception):
+    pass

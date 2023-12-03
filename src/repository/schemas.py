@@ -2,7 +2,7 @@ import datetime as dt
 from enum import StrEnum
 from uuid import UUID
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field, validator
 
 
 class Roles(StrEnum):
@@ -19,14 +19,24 @@ class UserRoleSchema(BaseModel):
     id: UUID
     name: Roles
 
+    class Config:
+        orm_mode = True
 
-class UserSchema(BaseModel):
+
+class BaseUserSchema(BaseModel):
     id: UUID
     login: str
     password: str
-    roles: list[UserRoleSchema]
     first_name: str
     last_name: str
+    created_at: dt.datetime
+
+    class Config:
+        orm_mode = True
+
+
+class UserSchema(BaseUserSchema):
+    roles: list[UserRoleSchema]
 
 
 class UserLoginSchema(BaseModel):
@@ -35,3 +45,6 @@ class UserLoginSchema(BaseModel):
     login_at: dt.datetime
     ip_address: str
     user_agent: str
+
+    class Config:
+        orm_mode = True
