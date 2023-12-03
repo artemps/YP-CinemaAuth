@@ -1,7 +1,7 @@
 from async_fastapi_jwt_auth import AuthJWT
 from fastapi import Depends
 
-from models import User
+from repository.sql_alchemy.models import User
 from services import (
     SecurityService,
     UserService,

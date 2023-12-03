@@ -3,7 +3,7 @@ from uuid import UUID
 from fastapi import APIRouter, Body, Depends, Path, status
 
 from api.dependencies import authenticated_user
-from models import User
+from repository.sql_alchemy.models import User
 from services import (
     SecurityService,
     UserService,
