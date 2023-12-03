@@ -19,7 +19,7 @@ class AbstractRepository(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    async def get_by_login(self, login: str) -> User:
+    async def get_by_email(self, email: str) -> User:
         raise NotImplementedError
 
     @abstractmethod
@@ -27,11 +27,11 @@ class AbstractRepository(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    async def check_unique_login(self, login: str) -> bool:
+    async def check_unique_email(self, email: str) -> bool:
         raise NotImplementedError
 
     @abstractmethod
-    async def make_login(self, user: User) -> None:
+    async def make_email(self, user: User) -> None:
         raise NotImplementedError
 
 
@@ -51,9 +51,9 @@ class SQLAlchemyRepository(AbstractRepository):
             await session.execute(stmt)
             await session.commit()
 
-    async def get_by_login(self, login: str) -> User:
+    async def get_by_email(self, email: str) -> User:
         async with async_session() as session:
-            stmt = select(self.model).where(self.model.login == login)
+            stmt = select(self.model).where(self.model.email == email)
             res = await session.execute(stmt)
             return res.scalar_one()
 
@@ -63,13 +63,13 @@ class SQLAlchemyRepository(AbstractRepository):
             result = await session.execute(statement)
             return result.scalar_one()
 
-    async def check_unique_login(self, login: str) -> bool:
+    async def check_unique_email(self, email: str) -> bool:
         async with async_session() as session:
-            stmt = select(self.model).where(self.model.login == login)
+            stmt = select(self.model).where(self.model.email == email)
             res = await session.execute(stmt)
             return len([x[0] for x in res]) > 0
 
-    async def make_login(self, user: User) -> None:
+    async def make_email(self, user: User) -> None:
         async with async_session() as session:
             stmt = insert(UserLogin).values({"user_id": user.id})
             await session.execute(stmt)

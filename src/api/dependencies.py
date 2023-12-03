@@ -16,7 +16,7 @@ async def authenticated_user(
     auth: AuthJWT = Depends(),
 ) -> User:
     await auth.jwt_required()
-    login = await auth.get_jwt_subject()
-    await security_service.authenticate(auth, login)
-    user = await user.get(login=login)
+    email = await auth.get_jwt_subject()
+    await security_service.authenticate(auth, email)
+    user = await user.get(email=email)
     return user

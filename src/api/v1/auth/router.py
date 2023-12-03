@@ -22,11 +22,11 @@ async def login(
     user_service: UserService = Depends(get_user_service),
     auth: AuthJWT = Depends()
 ):
-    user = await user_service.get(login=schema.login)
+    user = await user_service.get(email=schema.email)
     security_service.verify_password(schema.password, user.password)
-    await user_service.make_login(user)
-    access_token = await security_service.create_access_token(user.login, auth)
-    refresh_token = await security_service.create_refresh_token(user.login, auth, access_token)
+    await user_service.make_email(user)
+    access_token = await security_service.create_access_token(user.email, auth)
+    refresh_token = await security_service.create_refresh_token(user.email, auth, access_token)
     return schemas.UserLoginOut(access_token=access_token, refresh_token=refresh_token, token_type="bearer")
 
 

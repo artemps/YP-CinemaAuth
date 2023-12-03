@@ -2,7 +2,7 @@ from pydantic import BaseModel, Extra, Field
 
 
 class UserLoginIn(BaseModel):
-    login: str = Field(..., max_length=255, description="Account login information")
+    email: str = Field(..., max_length=255, description="Account email information")
     password: str = Field(..., max_length=255, description="Account password")
 
     class Config:
