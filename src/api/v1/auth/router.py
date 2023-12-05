@@ -21,7 +21,7 @@ async def login(
     security_service: SecurityService = Depends(get_security_service),
     user_service: UserService = Depends(get_user_service),
     auth: AuthJWT = Depends()
-):
+) -> schemas.UserLoginOut:
     user = await user_service.get(login=schema.login)
     security_service.verify_password(schema.password, user.password)
     await user_service.make_login(user)
