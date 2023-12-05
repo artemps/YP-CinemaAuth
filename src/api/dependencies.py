@@ -1,7 +1,7 @@
 from async_fastapi_jwt_auth import AuthJWT
-from fastapi import Depends
+from fastapi import Depends, Request
 
-from models import User
+from repository.sql_alchemy.models import User
 from services import (
     SecurityService,
     UserService,
@@ -20,3 +20,4 @@ async def authenticated_user(
     await security_service.authenticate(auth, login)
     user = await user_service.get(login=login)
     return user
+
