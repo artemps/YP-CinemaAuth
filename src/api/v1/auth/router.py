@@ -25,16 +25,16 @@ async def login(
 ) -> schemas.UserLoginOut:
     user = await user_service.get(login=schema.login)
     security_service.verify_password(schema.password, user.password)
+
     coro = user_service.create_login_record(
         user.id,
         user_agent=request.headers.get("User-Agent"),
         ip_address=request.client.host,
     )
     asyncio.create_task(coro)
-    access_token, refresh_token = await asyncio.gather(
-        security_service.create_access_token(user.login, auth),
-        security_service.create_refresh_token(user.login, auth),
-    )
+    access_token = await security_service.create_access_token(user.login, auth)
+    refresh_token = await security_service.create_refresh_token(user.login, auth, access_token)
+
     return schemas.UserLoginOut(access_token=access_token, refresh_token=refresh_token, token_type="bearer")
 
 
