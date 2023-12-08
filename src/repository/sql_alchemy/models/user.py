@@ -16,7 +16,7 @@ class User(Base):
 
     # fields
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    login: Mapped[str] = mapped_column(String(255), unique=True, nullable=False, index=True)
+    email: Mapped[str] = mapped_column(String(255), unique=True, nullable=False, index=True)
     password: Mapped[str] = mapped_column(String(255), nullable=False)
     first_name: Mapped[str] = mapped_column(String(50), nullable=False, default="")
     last_name: Mapped[str] = mapped_column(String(50), nullable=False, default="")
@@ -31,7 +31,7 @@ class User(Base):
     )
 
     def __repr__(self) -> str:
-        return f"<User {self.login}>"
+        return f"<User {self.email}>"
 
     def __str__(self) -> str:
         return f"{self.first_name} {self.last_name}"

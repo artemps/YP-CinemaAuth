@@ -33,20 +33,20 @@ class SecurityService:
     def create_hashed_password(self, password: str) -> str:
         return self.pwd_context.hash(password)
 
-    async def create_access_token(self, user_login: str, auth: AuthJWT) -> str:
+    async def create_access_token(self, user_email: str, auth: AuthJWT) -> str:
 
         access_token = await auth.create_access_token(
-            subject=user_login,
+            subject=user_email,
             expires_time=self._refresh_token_ttl,
             algorithm=self._encryption_algorithm,
 
         )
         return access_token
 
-    async def create_refresh_token(self, user_login: str, auth: AuthJWT, access_token: str) -> str:
+    async def create_refresh_token(self, user_email: str, auth: AuthJWT, access_token: str) -> str:
         access_jti = await auth.get_jti(access_token)
         refresh_token = await auth.create_refresh_token(
-            subject=user_login,
+            subject=user_email,
             expires_time=self._access_token_ttl,
             algorithm=self._encryption_algorithm,
             user_claims={"access_jti": access_jti}
@@ -77,21 +77,21 @@ class SecurityService:
     async def authenticate(
         self,
         auth: AuthJWT,
-        login: str,
+        email: str,
         redis_service: RedisService = get_redis_service()
     ) -> str:
         await auth.jwt_required()
-        login_in_jwt = await auth.get_jwt_subject()
+        email_in_jwt = await auth.get_jwt_subject()
         jti = (await auth.get_raw_jwt())["jti"]
         entry = redis_service.get_token(jti)
 
         if entry:
             raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Token in revoke list")
 
-        if login != login_in_jwt:
+        if email != email_in_jwt:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Access denied")
 
-        return login
+        return email
 
     async def logout(
         self,

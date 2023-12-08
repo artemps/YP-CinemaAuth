@@ -1,7 +1,7 @@
 import datetime as dt
 from uuid import UUID
 
-from pydantic import BaseModel, Extra, Field, validator
+from pydantic import BaseModel, Extra, Field, validator, EmailStr
 
 
 class UserOut(BaseModel):
@@ -25,7 +25,7 @@ class UserUpdateIn(BaseModel):
 
 
 class UserCreateIn(BaseModel):
-    login: str = Field(..., max_length=255, description="Account login information")
+    email: EmailStr = Field(..., max_length=255, description="Account email information")
     password: str = Field(..., max_length=255, min_length=8, description="Account password")
     first_name: str = Field("", min_length=5, max_length=50, description="Account first name")
     last_name: str = Field("", min_length=5, max_length=50, description="Account last name")
