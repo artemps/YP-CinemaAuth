@@ -7,20 +7,20 @@ from repository.database import AbstractRepository
 from repository.exceptions import UserDoesNotExist, UserAlreadyExists
 from repository.schemas import UserSchema, UserLoginSchema, Roles
 from repository.sql_alchemy import SQLAlchemyRepository
-from services.security import SecurityService
+from services.security import SecurityService, get_security_service
 
 
 class UserService:
     def __init__(self, repository: AbstractRepository) -> None:
         self.repository: AbstractRepository = repository
 
-    async def get(self, *, id: UUID = None, login: str = None) -> UserSchema:
+    async def get(self, *, id: UUID = None, email: str = None) -> UserSchema:
         try:
             if id is not None:
                 return await self.repository.get_user_by_id(id)
 
-            if login is not None:
-                return await self.repository.get_user_by_login(login)
+            if email is not None:
+                return await self.repository.get_user_by_email(email)
 
         except UserDoesNotExist:
             raise HTTPException(status.HTTP_404_NOT_FOUND, "User not found")
@@ -28,14 +28,14 @@ class UserService:
     async def create(
         self,
         schema: schemas.UserCreateIn,
-        security_service: SecurityService,
+        security_service: SecurityService = get_security_service(),
     ) -> UserSchema:
         user_dict = schema.model_dump()
         user_dict["password"] = security_service.create_hashed_password(user_dict["password"])
         try:
             user = await self.repository.create_user(user_dict)
         except UserAlreadyExists:
-            raise HTTPException(status.HTTP_409_CONFLICT, "Login already taken")
+            raise HTTPException(status.HTTP_409_CONFLICT, "Email already taken")
         else:
             user = await self.repository.set_user_role(user.id, Roles.USER)
             return user
@@ -44,7 +44,7 @@ class UserService:
         try:
             return await self.repository.update_user(id, schema.model_dump(exclude_unset=True))
         except UserAlreadyExists:
-            raise HTTPException(status.HTTP_409_CONFLICT, "Login already taken")
+            raise HTTPException(status.HTTP_409_CONFLICT, "Email already taken")
 
     async def delete(self, id: UUID) -> None:
         try:

@@ -9,7 +9,7 @@ from services import (
     SecurityService,
     UserService,
     get_security_service,
-    get_user_service,
+    get_user_service, get_role_service,
 )
 
 
@@ -21,7 +21,7 @@ async def authenticated_user(
     await auth.jwt_required()
     email = await auth.get_jwt_subject()
     await security_service.authenticate(auth, email)
-    user = await user.get(email=email)
+    user = await user_service.get(email=email)
     return user
 
 
@@ -29,9 +29,9 @@ def roles_required(roles_list: list[Roles]):
     def decorator(function):
         @wraps(function)
         async def wrapper(*args, **kwargs):
-            user_service = get_user_service()
-            user = await user_service.get(id=kwargs.get("user_id"))
-            if not set(roles_list).intersection(set([x.name for x in user.roles])):
+            role_service = get_role_service()
+            has_access = await role_service.has_roles(kwargs["user_id"], roles_list)
+            if not has_access:
                 raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Permission denied")
             return await function(*args, **kwargs)
         return wrapper

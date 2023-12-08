@@ -23,9 +23,9 @@ class SQLAlchemyRepository(AbstractRepository):
                 raise UserDoesNotExist from error
             return UserSchema.model_validate(result, from_attributes=True)
 
-    async def get_user_by_login(self, login: str) -> UserSchema:
+    async def get_user_by_email(self, email: str) -> UserSchema:
         async with async_session() as session:
-            statement = select(User).where(User.login == login)
+            statement = select(User).where(User.email == email)
             try:
                 result = (await session.execute(statement)).unique().scalar_one()
             except NoResultFound as error:
@@ -103,6 +103,15 @@ class SQLAlchemyRepository(AbstractRepository):
             session.add(role)
             await session.commit()
         return role
+
+    async def get_user_roles(self, user_id: UUID) -> list[Roles]:
+        async with async_session() as session:
+            statement = select(User).where(User.id == user_id).options(joinedload(User.roles))
+            try:
+                user = (await session.execute(statement)).unique().scalar_one()
+            except NoResultFound as error:
+                raise UserDoesNotExist from error
+            return [Roles(role.name) for role in user.roles]
 
     async def create_user_login_record(self, user_id: UUID, ip_address: str, user_agent: str) -> UserLoginSchema:
         async with async_session() as session:

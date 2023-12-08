@@ -10,7 +10,7 @@ class AbstractRepository(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    async def get_user_by_login(self, login: str) -> UserSchema:
+    async def get_user_by_email(self, email: str) -> UserSchema:
         raise NotImplementedError
 
     @abstractmethod
@@ -31,6 +31,10 @@ class AbstractRepository(ABC):
 
     @abstractmethod
     async def remove_user_role(self, user_id: UUID, role: Roles) -> UserSchema:
+        raise NotImplementedError
+
+    @abstractmethod
+    async def get_user_roles(self, user_id: UUID) -> list[Roles]:
         raise NotImplementedError
 
     @abstractmethod

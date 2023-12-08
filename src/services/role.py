@@ -28,6 +28,13 @@ class RoleService:
         except RoleDoesNotExist:
             raise HTTPException(status.HTTP_404_NOT_FOUND, f"User does not have role {role}")
 
+    async def has_roles(self, user_id: UUID, roles: list[Roles]) -> bool:
+        try:
+            user_roles = await self.repository.get_user_roles(user_id)
+        except UserDoesNotExist:
+            raise HTTPException(status.HTTP_404_NOT_FOUND, "User not found")
+        return set(roles).issubset(set(user_roles))
+
 
 def get_role_service():
     return RoleService(SQLAlchemyRepository())
