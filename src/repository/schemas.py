@@ -25,7 +25,7 @@ class UserRoleSchema(BaseModel):
 
 class BaseUserSchema(BaseModel):
     id: UUID
-    login: str
+    email: str
     password: str
     first_name: str
     last_name: str

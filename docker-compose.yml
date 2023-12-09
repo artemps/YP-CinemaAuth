@@ -9,8 +9,6 @@ services:
       - redis
     env_file:
       - .env
-    ports:
-      - "8000:8080"
     restart: unless-stopped
 
   db:
@@ -30,6 +28,21 @@ services:
     image: redis:alpine
     container_name: redis
     restart: unless-stopped
+
+  nginx:
+    image: nginx:1.25.3-alpine
+    container_name: nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.default.conf.template:/etc/nginx/templates/default.conf.template:ro
+    environment:
+      - NGINX_HOST
+      - APP_PORT
+      - APP_HOST
+    depends_on:
+      - app
 
 volumes:
   postgres_data:
