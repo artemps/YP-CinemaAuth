@@ -1,3 +1,5 @@
+from contextlib import asynccontextmanager
+
 from sqlalchemy import MetaData
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import declarative_base, sessionmaker
@@ -12,6 +14,7 @@ engine = create_async_engine(dsn, echo=settings.debug, future=True)
 async_session = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 
 
+@asynccontextmanager
 async def get_session() -> AsyncSession:
     async with async_session() as session:
         yield session
