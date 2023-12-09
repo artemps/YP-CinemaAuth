@@ -13,7 +13,7 @@ app = FastAPI(
     openapi_url=settings.openapi_documentation_url,
     docs_url=settings.api_documentation_url,
 )
-app.include_router(router, prefix="/api")
+app.include_router(router)
 
 
 @app.exception_handler(AuthJWTException)
