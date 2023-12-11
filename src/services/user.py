@@ -8,6 +8,8 @@ from repository.exceptions import UserDoesNotExist, UserAlreadyExists
 from repository.schemas import UserSchema, UserLoginSchema, Roles
 from repository.sql_alchemy import SQLAlchemyRepository
 from services.security import SecurityService, get_security_service
+import random
+import string
 
 
 class UserService:
@@ -59,6 +61,24 @@ class UserService:
     async def get_login_records(self, id: UUID, limit: int = 10, offset: int = 0) -> list[UserLoginSchema]:
         records = await self.repository.get_user_login_records(id, limit=limit, offset=offset)
         return records
+
+    def create_random_password(self):
+        characters = string.ascii_letters + string.digits + string.punctuation
+        password = ''.join(random.choice(characters) for i in range(8))
+        return password
+
+    async def user_via_social_network(self, user_info):
+        try:
+            user = await self.repository.get_user_by_email(user_info['default_email'])
+        except UserDoesNotExist:
+            user = UserCreateIn(
+                email=user_info['default_email'],
+                password=user_info(),
+                first_name=user_info['first_name'],
+                last_name=user_info['last_name']
+            )
+            user = await self.create(user)
+        return user
 
 
 def get_user_service():
