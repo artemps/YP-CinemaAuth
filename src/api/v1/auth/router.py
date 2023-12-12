@@ -23,7 +23,6 @@ router = APIRouter()
 
 
 @router.post("/login", description=ENDPOINT_DESCRIPTIONS["login"])
-@limiter.limit("5/minute")
 async def login(
         schema: schemas.UserLoginIn,
         request: Request,
@@ -47,7 +46,6 @@ async def login(
 
 
 @router.post("/refresh")
-@limiter.limit("5/minute")
 async def refresh(
         request: Request,
         auth: AuthJWT = Depends(),
@@ -62,7 +60,6 @@ async def refresh(
 
 
 @router.post("/logout")
-@limiter.limit("5/minute")
 async def logout(
         request: Request,
         auth: AuthJWT = Depends(),
@@ -73,7 +70,6 @@ async def logout(
 
 
 @router.get('/login-via-{social_network}')
-@limiter.limit("5/minute")
 async def login_via_social_network(
         request: Request,
         social_network

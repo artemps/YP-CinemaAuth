@@ -15,4 +15,8 @@ def get_token(request: Request) -> str:
     return user
 
 
-limiter = Limiter(key_func=get_token, storage_uri=f"redis://{settings.redis_host}:{settings.redis_port}/n")
+limiter = Limiter(
+    key_func=get_token,
+    storage_uri=f"redis://{settings.redis_host}:{settings.redis_port}/n",
+    default_limits=[settings.limiter_default]
+)

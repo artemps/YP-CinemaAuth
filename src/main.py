@@ -2,14 +2,16 @@ import logging
 import random
 
 from async_fastapi_jwt_auth.exceptions import AuthJWTException
-from fastapi import FastAPI, Request
-from fastapi.responses import JSONResponse
+from fastapi import FastAPI, Request, status
+from fastapi.responses import JSONResponse, ORJSONResponse
 from starlette.middleware.sessions import SessionMiddleware
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
+from slowapi.middleware import SlowAPIMiddleware
+from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
 
 from api.router import router
-from core import settings, limiter
+from core import settings, limiter, tracer
 
 
 app = FastAPI(
@@ -18,10 +20,24 @@ app = FastAPI(
     openapi_url=settings.openapi_documentation_url,
     docs_url=settings.api_documentation_url,
 )
+
+tracer.configure_tracer()
+FastAPIInstrumentor.instrument_app(app)
+
 app.include_router(router)
 app.add_middleware(SessionMiddleware, secret_key=random.randrange(0, 99999))
 app.state.limiter = limiter.limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+app.add_middleware(SlowAPIMiddleware)
+
+
+@app.middleware('http')
+async def before_request(request: Request, call_next):
+    response = await call_next(request)
+    request_id = request.headers.get('X-Request-Id')
+    if not request_id and settings.X_REQUEST_ID:
+        return ORJSONResponse(status_code=status.HTTP_400_BAD_REQUEST, content={'detail': 'X-Request-Id is required'})
+    return response
 
 
 @app.exception_handler(AuthJWTException)
@@ -40,7 +56,3 @@ if __name__ == "__main__":
         log_level=logging.DEBUG if settings.debug else logging.INFO,
         reload=settings.debug,
     )
-
-
-
-
