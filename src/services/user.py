@@ -1,4 +1,6 @@
 from uuid import UUID
+import random
+import string
 
 from fastapi import HTTPException, status
 
@@ -8,8 +10,6 @@ from repository.exceptions import UserDoesNotExist, UserAlreadyExists
 from repository.schemas import UserSchema, UserLoginSchema, Roles
 from repository.sql_alchemy import SQLAlchemyRepository
 from services.security import SecurityService, get_security_service
-import random
-import string
 
 
 class UserService:
@@ -73,7 +73,7 @@ class UserService:
         except UserDoesNotExist:
             user = UserCreateIn(
                 email=user_info['default_email'],
-                password=user_info(),
+                password=self.create_random_password(),
                 first_name=user_info['first_name'],
                 last_name=user_info['last_name']
             )

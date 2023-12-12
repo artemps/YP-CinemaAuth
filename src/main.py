@@ -7,6 +7,7 @@ from fastapi.responses import JSONResponse, ORJSONResponse
 from starlette.middleware.sessions import SessionMiddleware
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
+from slowapi.middleware import SlowAPIMiddleware
 from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
 
 from api.router import router
@@ -27,6 +28,7 @@ app.include_router(router)
 app.add_middleware(SessionMiddleware, secret_key=random.randrange(0, 99999))
 app.state.limiter = limiter.limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+app.add_middleware(SlowAPIMiddleware)
 
 
 @app.middleware('http')

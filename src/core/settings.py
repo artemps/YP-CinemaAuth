@@ -40,6 +40,8 @@ class Settings(BaseSettings):
     authjwt_denylist_enabled: bool = False
     authjwt_denylist_token_checks: set = {"access", "refresh"}
 
+    limiter_default: str = "5/minute"
+
     logging_config.dictConfig(LOGGING)
 
     class Config:
