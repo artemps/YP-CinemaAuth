@@ -13,20 +13,23 @@ from . import schemas
 from .const import ENDPOINT_DESCRIPTIONS
 
 from core.settings_oauth import oauth
+from core.limiter import limiter
 
 from repository.exceptions import UserDoesNotExist, UserAlreadyExists
 from api.v1.users.schemas import UserCreateIn
+
 
 router = APIRouter()
 
 
 @router.post("/login", description=ENDPOINT_DESCRIPTIONS["login"])
+@limiter.limit("5/minute")
 async def login(
-    schema: schemas.UserLoginIn,
-    request: Request,
-    security_service: SecurityService = Depends(get_security_service),
-    user_service: UserService = Depends(get_user_service),
-    auth: AuthJWT = Depends()
+        schema: schemas.UserLoginIn,
+        request: Request,
+        security_service: SecurityService = Depends(get_security_service),
+        user_service: UserService = Depends(get_user_service),
+        auth: AuthJWT = Depends()
 ) -> schemas.UserLoginOut:
     user = await user_service.get(email=schema.email)
     security_service.verify_password(schema.password, user.password)
@@ -44,9 +47,11 @@ async def login(
 
 
 @router.post("/refresh")
+@limiter.limit("5/minute")
 async def refresh(
-    auth: AuthJWT = Depends(),
-    security_service: SecurityService = Depends(get_security_service),
+        request: Request,
+        auth: AuthJWT = Depends(),
+        security_service: SecurityService = Depends(get_security_service),
 ) -> schemas.UserLoginOut:
     new_tokens = await security_service.refresh_token(auth)
     return schemas.UserLoginOut(
@@ -57,19 +62,22 @@ async def refresh(
 
 
 @router.post("/logout")
+@limiter.limit("5/minute")
 async def logout(
-    auth: AuthJWT = Depends(),
-    security_service: SecurityService = Depends(get_security_service),
+        request: Request,
+        auth: AuthJWT = Depends(),
+        security_service: SecurityService = Depends(get_security_service),
 ) -> schemas.UserLogout():
     await security_service.logout(auth)
     return schemas.UserLogout()
 
 
 @router.get('/login-via-{social_network}')
+@limiter.limit("5/minute")
 async def login_via_social_network(
         request: Request,
         social_network
-        ):
+):
     redirect_uri = request.url_for(
         'social_network_callback',
         social_network=social_network)
@@ -103,5 +111,3 @@ async def social_network_callback(
     refresh_token = await security_service.create_refresh_token(user.email, auth, access_token)
 
     return schemas.UserLoginOut(access_token=access_token, refresh_token=refresh_token, token_type="bearer")
-
-
