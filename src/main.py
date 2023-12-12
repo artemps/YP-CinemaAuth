@@ -1,11 +1,14 @@
 import logging
+import random
 
 from async_fastapi_jwt_auth.exceptions import AuthJWTException
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
+from starlette.middleware.sessions import SessionMiddleware
 
 from api.router import router
 from core import settings
+
 
 app = FastAPI(
     title=settings.project_name,
@@ -14,7 +17,7 @@ app = FastAPI(
     docs_url=settings.api_documentation_url,
 )
 app.include_router(router)
-
+app.add_middleware(SessionMiddleware, secret_key=random.randrange(0, 99999))
 
 @app.exception_handler(AuthJWTException)
 def authjwt_exception_handler(request: Request, exc: AuthJWTException) -> JSONResponse:
