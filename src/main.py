@@ -5,9 +5,11 @@ from async_fastapi_jwt_auth.exceptions import AuthJWTException
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from starlette.middleware.sessions import SessionMiddleware
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
 
 from api.router import router
-from core import settings
+from core import settings, limiter
 
 
 app = FastAPI(
@@ -18,6 +20,9 @@ app = FastAPI(
 )
 app.include_router(router)
 app.add_middleware(SessionMiddleware, secret_key=random.randrange(0, 99999))
+app.state.limiter = limiter.limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
 
 @app.exception_handler(AuthJWTException)
 def authjwt_exception_handler(request: Request, exc: AuthJWTException) -> JSONResponse:
