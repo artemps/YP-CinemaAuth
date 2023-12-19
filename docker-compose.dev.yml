@@ -9,9 +9,22 @@ services:
     environment:
       POSTGRES_PASSWORD: 123qwe
       POSTGRES_USER: app
-      POSTGRES_DB: movies_database
+      POSTGRES_DB: cinema_auth
     ports:
       - "5432:5432"
+    restart: always
+
+  db_admin:
+    image: postgres:13
+    container_name: admin_db
+    volumes:
+      - admin_postgres_data:/var/lib/postgresql/data/
+    environment:
+      POSTGRES_PASSWORD: 123qwe
+      POSTGRES_USER: app
+      POSTGRES_DB: movies_database
+    ports:
+      - "5433:5432"
     restart: always
 
   redis:
@@ -20,5 +33,19 @@ services:
     ports:
       - "6379:6379"
 
+  elastic:
+    image: elasticsearch:8.6.2
+    container_name: elastic
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+    volumes:
+      - es_data:/usr/share/elasticsearch/data
+    ports:
+      - "9200:9200"
+    restart: always
+
 volumes:
   postgres_data:
+  es_data:
+  admin_postgres_data:

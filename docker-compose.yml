@@ -24,10 +24,31 @@ services:
       POSTGRES_DB: cinema_auth
     restart: unless-stopped
 
+  db_admin:
+    image: postgres:13
+    container_name: admin_db
+    volumes:
+      - admin_postgres_data:/var/lib/postgresql/data/
+    environment:
+      POSTGRES_PASSWORD: 123qwe
+      POSTGRES_USER: app
+      POSTGRES_DB: movies_database
+    restart: always
+
   redis:
     image: redis:alpine
     container_name: redis
     restart: unless-stopped
+
+  elastic:
+    image: elasticsearch:8.6.2
+    container_name: elastic
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+    volumes:
+      - es_data:/usr/share/elasticsearch/data
+    restart: always
 
   nginx:
     image: nginx:1.25.3-alpine
@@ -46,3 +67,5 @@ services:
 
 volumes:
   postgres_data:
+  es_data:
+  admin_postgres_data:
