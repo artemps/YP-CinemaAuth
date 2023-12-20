@@ -1,8 +1,10 @@
 import logging
 import random
+from typing import Callable
 
 from async_fastapi_jwt_auth.exceptions import AuthJWTException
 from fastapi import FastAPI, Request, status
+from fastapi.openapi.models import Response
 from fastapi.responses import JSONResponse, ORJSONResponse
 from starlette.middleware.sessions import SessionMiddleware
 from slowapi import Limiter, _rate_limit_exceeded_handler
@@ -21,8 +23,9 @@ app = FastAPI(
     docs_url=settings.api_documentation_url,
 )
 
-tracer.configure_tracer()
-FastAPIInstrumentor.instrument_app(app)
+if settings.is_tracer_enabled:
+    tracer.configure_tracer()
+    FastAPIInstrumentor.instrument_app(app)
 
 app.include_router(router)
 app.add_middleware(SessionMiddleware, secret_key=random.randrange(0, 99999))
@@ -32,7 +35,7 @@ app.add_middleware(SlowAPIMiddleware)
 
 
 @app.middleware('http')
-async def before_request(request: Request, call_next):
+async def before_request(request: Request, call_next: Callable) -> Response | ORJSONResponse:
     response = await call_next(request)
     request_id = request.headers.get('X-Request-Id')
     if not request_id and settings.X_REQUEST_ID:
