@@ -98,13 +98,3 @@ def authenticate_client(
         return client
 
     return _authenticate_client
-
-
-
-# @pytest.fixture(scope="function")
-# async def auth_user(fastapi_app, session):
-#     user = await User.create(session, schema=UserCreate(username="testtest", password="testtest"))
-#     token = create_access_token(user.id)
-#     async with AsyncClient(app=fastapi_app, base_url=settings.server_address,
-#                            headers={'Authorization': f'Bearer {token}'}) as client:
-#         yield client, user

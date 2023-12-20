@@ -1,12 +1,11 @@
 from uuid import UUID
 
-from fastapi import Depends
 from sqlalchemy import insert, select, update
 from sqlalchemy.exc import NoResultFound, IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
 
-from core.database import get_session, async_session
+from core.database import get_session
 from repository.database import AbstractRepository
 from repository.exceptions import RoleAlreadyExists, RoleDoesNotExist, UserDoesNotExist, UserAlreadyExists
 from repository.schemas import UserSchema, UserLoginSchema, Roles, BaseUserSchema
