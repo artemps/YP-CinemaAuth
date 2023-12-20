@@ -1,28 +1,96 @@
 version: '3.7'
+name: 'cinema'
 
 services:
-  app:
+  auth-service:
     build: .
-    container_name: app
+    container_name: auth-service
     depends_on:
       - db
       - redis
-    env_file:
-      - .env
     restart: unless-stopped
+    environment:
+      - PROJECT_NAME
+      - DEBUG
+      - X_REQUEST_ID
+      - SECRET_KEY
+      - REDIS_HOST
+      - REDIS_PORT
+      - JAEGER_HOST
+      - ACCESS_TOKEN_TTL
+      - REFRESH_TOKEN_TTL
+      - ENCRYPTION_ALGORITHM
+      - DB_NAME=${POSTGRES_DB}
+      - DB_USER=${POSTGRES_USER}
+      - DB_PASSWORD=${POSTGRES_PASSWORD}
+      - DB_HOST=${POSTGRES_HOST}
+      - DB_PORT=${POSTGRES_PORT}
+      - APP_HOST=localhost
+      - APP_PORT=8080
+
+  content-service:
+    image: frostfree/cinema-content:v0.1
+    container_name: content-service
+    restart: unless-stopped
+    depends_on:
+      - elastic
+      - redis
+    environment:
+      - PROJECT_NAME
+      - DEBUG
+      - SECRET_KEY
+      - REDIS_HOST
+      - REDIS_PORT
+      - ELASTIC_HOST
+      - ELASTIC_PORT
+      - APP_HOST=localhost
+      - APP_PORT=8080
+
+  admin-service:
+    image: frostfree/cinema-admin:v0.1
+    container_name: admin-service
+    restart: unless-stopped
+    volumes:
+      - static:/opt/app/static
+      - media:/opt/app/media
+    depends_on:
+      - db
+      - auth-service
+    environment:
+      - DJANGO_SECRET_KEY
+      - DEBUG
+      - ALLOWED_HOSTS
+      - POSTGRES_DB
+      - POSTGRES_USER
+      - POSTGRES_PASSWORD
+      - POSTGRES_HOST
+      - POSTGRES_PORT
+      - POSTGRES_SEARCH_PATHS
+      - AUTH_API_LOGIN_URL
+      - AUTH_API_USER_INFO
 
   db:
     image: postgres:13
     container_name: db
+    restart: unless-stopped
     volumes:
       - postgres_data:/var/lib/postgresql/data/
-    env_file:
-      - .env
     environment:
-      POSTGRES_PASSWORD: 123qwe
-      POSTGRES_USER: app
-      POSTGRES_DB: cinema_auth
+      - POSTGRES_DB
+      - POSTGRES_USER
+      - POSTGRES_PASSWORD
+      - POSTGRES_HOST
+      - POSTGRES_PORT
+
+  elastic:
+    image: elasticsearch:8.6.2
+    container_name: elastic
     restart: unless-stopped
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+    volumes:
+      - es_data:/usr/share/elasticsearch/data
 
   redis:
     image: redis:alpine
@@ -36,13 +104,18 @@ services:
     ports:
       - "80:80"
     volumes:
+      - media:/var/html/media
+      - static:/var/html/static
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
       - ./nginx.default.conf.template:/etc/nginx/templates/default.conf.template:ro
     environment:
       - NGINX_HOST
-      - APP_PORT
-      - APP_HOST
     depends_on:
-      - app
+      - auth-service
+      - admin-service
 
 volumes:
   postgres_data:
+  es_data:
+  media:
+  static:
