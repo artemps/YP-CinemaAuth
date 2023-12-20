@@ -17,6 +17,7 @@ services:
       - REDIS_HOST
       - REDIS_PORT
       - JAEGER_HOST
+      - JAEGER_PORT
       - ACCESS_TOKEN_TTL
       - REFRESH_TOKEN_TTL
       - ENCRYPTION_ALGORITHM

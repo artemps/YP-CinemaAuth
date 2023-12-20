@@ -31,6 +31,7 @@ class Settings(BaseSettings):
     db_port: int = Field(..., env="DB_PORT")
 
     jaeger_host: str = Field(default="localhost", env="JAEGER_HOST")
+    jaeger_port: int = Field(default=6831, env="JAEGER_PORT")
 
     access_token_ttl: int = Field(default=60 * 20, env="ACCESS_TOKEN_TTL")  # 20 minutes
     refresh_token_ttl: int = Field(default=60 * 60 * 24 * 3, env="REFRESH_TOKEN_TTL")  # 3 days
