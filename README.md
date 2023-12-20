@@ -1,31 +1,12 @@
 # CinemaAuth
 
-Проект живет вот [тут](https://github.com/artemps/CinemaAuth)
+- Сервис по [работе с пользователями](https://github.com/artemps/CinemaAuth)
+- Сервис по [доставке контента](https://github.com/Fr0stFree/Yandex-Python-Middle-Sprint-5)
+- Сервис для [администрирования проекта](https://github.com/Fr0stFree/Yandex-Python-Middle-Sprint-3)
 
 ## Сервис авторизации пользователей
 
-**Перед первым запуском установите poetry, затем зависимости**
+**Для запуска проекта необходимо из корневой директории проекта выполнить команду**
 ```shell
-poetry install
-```
-
-**Ручной запуск**
-```shell
-docker-compose up -d
-poetry run python src/main.py
-```
-
-**Автоматический запуск**
-```shell
-make up
-```
-
-**Для запуска тестов**
-```shell
-make test
-```
-
-**Для запуска линтеров**
-```shell
-make lint
+make up-prod
 ```
