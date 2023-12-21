@@ -18,6 +18,7 @@ services:
       - REDIS_PORT
       - IS_TRACER_ENABLED
       - JAEGER_HOST
+      - JAEGER_PORT
       - ACCESS_TOKEN_TTL
       - REFRESH_TOKEN_TTL
       - ENCRYPTION_ALGORITHM
