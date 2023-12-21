@@ -30,6 +30,7 @@ class Settings(BaseSettings):
     db_host: str = Field(..., env="DB_HOST")
     db_port: int = Field(..., env="DB_PORT")
 
+    is_tracer_enabled: bool = Field(..., env="IS_TRACER_ENABLED")
     jaeger_host: str = Field(default="localhost", env="JAEGER_HOST")
 
     access_token_ttl: int = Field(default=60 * 20, env="ACCESS_TOKEN_TTL")  # 20 minutes

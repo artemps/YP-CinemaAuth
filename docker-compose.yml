@@ -16,6 +16,7 @@ services:
       - SECRET_KEY
       - REDIS_HOST
       - REDIS_PORT
+      - IS_TRACER_ENABLED
       - JAEGER_HOST
       - ACCESS_TOKEN_TTL
       - REFRESH_TOKEN_TTL
