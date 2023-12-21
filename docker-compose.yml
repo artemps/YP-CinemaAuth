@@ -31,7 +31,7 @@ services:
       - APP_PORT=8080
 
   content-service:
-    image: frostfree/cinema-content:v0.1
+    image: frostfree/cinema-content:v0.2
     container_name: content-service
     restart: unless-stopped
     depends_on:
@@ -49,7 +49,7 @@ services:
       - APP_PORT=8080
 
   admin-service:
-    image: frostfree/cinema-admin:v0.1
+    image: frostfree/cinema-admin:v0.2
     container_name: admin-service
     restart: unless-stopped
     volumes:
