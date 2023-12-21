@@ -94,8 +94,10 @@ async def social_network_callback(
 
     social_network_response = await client.get('info', token=token)
 
-    user_info = social_network_response.json()
-    user = await user_service.user_via_social_network(user_info)
+    social_info = social_network_response.json()
+    social_info['social_name'] = social_network
+
+    user = await user_service.user_via_social_network(social_info)
 
     coro = user_service.create_login_record(
         user.id,

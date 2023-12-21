@@ -44,3 +44,11 @@ class AbstractRepository(ABC):
     @abstractmethod
     async def get_user_login_records(self, user_id: UUID, limit: int, offset: int) -> list[UserLoginSchema]:
         raise NotImplementedError
+
+    @abstractmethod
+    async def get_user_by_social_id(self, social_id: dict) -> UserSchema:
+        raise NotImplementedError
+
+    @abstractmethod
+    async def create_user_social_account(self, user_id: UUID, social_info: dict):
+        raise NotImplementedError

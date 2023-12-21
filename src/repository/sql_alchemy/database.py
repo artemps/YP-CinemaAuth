@@ -9,7 +9,7 @@ from core.database import get_session
 from repository.database import AbstractRepository
 from repository.exceptions import RoleAlreadyExists, RoleDoesNotExist, UserDoesNotExist, UserAlreadyExists
 from repository.schemas import UserSchema, UserLoginSchema, Roles, BaseUserSchema
-from .models import User, UserLogin, UserRole
+from .models import User, UserLogin, UserRole, SocialAccount
 
 
 class SQLAlchemyRepository(AbstractRepository):
@@ -124,3 +124,21 @@ class SQLAlchemyRepository(AbstractRepository):
             statement = select(UserLogin).where(UserLogin.user_id == user_id).limit(limit).offset(offset).order_by(UserLogin.login_at.desc())
             result = (await session.execute(statement)).scalars()
             return [UserLoginSchema.model_validate(record, from_attributes=True) for record in result]
+
+    async def get_user_by_social_id(self, social_info: dict) -> UserSchema:
+        async with get_session() as session:
+            statement = select(SocialAccount).where(
+                SocialAccount.social_id == social_info['id'],
+                SocialAccount.social_name == social_info['social_name']
+            ).options(joinedload(SocialAccount.user))
+            try:
+                result = (await session.execute(statement)).unique().scalar_one()
+            except NoResultFound as error:
+                raise UserDoesNotExist from error
+            return UserSchema.model_validate(result.user, from_attributes=True)
+
+    async def create_user_social_account(self, user_id: UUID, social_info: dict):
+        async with get_session() as session:
+            record = SocialAccount(user_id=user_id, social_id=social_info['id'], social_name=social_info['social_name'])
+            session.add(record)
+            await session.commit()

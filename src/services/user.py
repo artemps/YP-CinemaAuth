@@ -2,6 +2,7 @@ from uuid import UUID
 import random
 import string
 
+from faker import Faker
 from fastapi import HTTPException, status
 
 from api.v1.users import schemas
@@ -10,6 +11,8 @@ from repository.exceptions import UserDoesNotExist, UserAlreadyExists
 from repository.schemas import UserSchema, UserLoginSchema, Roles
 from repository.sql_alchemy import SQLAlchemyRepository
 from services.security import SecurityService, get_security_service
+
+fake = Faker()
 
 
 class UserService:
@@ -67,17 +70,22 @@ class UserService:
         password = ''.join(random.choice(characters) for i in range(8))
         return password
 
-    async def user_via_social_network(self, user_info):
+    async def user_via_social_network(self, social_info):
         try:
-            user = await self.repository.get_user_by_email(user_info['default_email'])
+            user = await self.repository.get_user_by_social_id(social_info)
+            return user
         except UserDoesNotExist:
-            user = UserCreateIn(
-                email=user_info['default_email'],
+            email = social_info.get('default_email') or social_info.get('email')
+            if not email:
+                email = fake.email()
+            user = schemas.UserCreateIn(
+                email=email,
                 password=self.create_random_password(),
-                first_name=user_info['first_name'],
-                last_name=user_info['last_name']
+                first_name=social_info['first_name'],
+                last_name=social_info['last_name']
             )
             user = await self.create(user)
+            await self.repository.create_user_social_account(user.id, social_info)
         return user
 
 
